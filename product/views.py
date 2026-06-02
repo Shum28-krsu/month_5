@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Count
 from . import serializers
 from . import models 
 
@@ -8,8 +9,8 @@ from . import models
 @api_view(['GET'])
 def category_list_api_view(request):
 
-    categories = models.Category.objects.all()
-
+    categories = models.Category.objects.annotate( products_count=Count('products'))
+    
     list_ = serializers.CategorySerializer(categories, many=True).data
 
     return Response( data=list_ )
@@ -77,3 +78,15 @@ def review_detail_api_view(request, id):
 
     return Response(data=data)
 
+
+from django.db.models import Avg
+
+
+@api_view(['GET'])
+def product_reviews_api_view(request):
+    
+    products = models.Product.objects.prefetch_related('reviews').annotate(rating=Avg('reviews__stars'))
+
+    list_ = serializers.ProductReviewSerializer( products, many=True ).data
+
+    return Response(data=list_)
