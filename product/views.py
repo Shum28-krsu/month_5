@@ -26,32 +26,31 @@ def category_list_api_view(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def category_detail_api_view(request, id):
 
-    try:
-        category = models.Category.objects.get(id=id)
-    except models.Category.DoesNotExist:
+    category = models.Category.objects.filter(id=id).first()
+
+    if not category:
         return Response(
-            data={'error': 'category not found!'},
+            {"error": "Category not found"},
             status=status.HTTP_404_NOT_FOUND
         )
 
     if request.method == 'GET':
-        data = serializers.CategorySerializer(category, many=False).data
-
-        return Response(data=data)
+        serializer = serializers.CategorySerializer(category)
+        return Response(serializer.data)
 
     elif request.method == 'PUT':
-        serializer = serializers.CategorySerializer( category, data=request.data )
+        serializer = serializers.CategorySerializer(category, data=request.data)
 
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
 
-        return Response(data=serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'DELETE':
         category.delete()
-
-        return Response( data={'message': 'category deleted'} )
-
+        return Response({"message": "Category deleted"})
+    
 #Product
 @api_view(['GET', 'POST'])
 def product_list_api_view(request):
@@ -77,11 +76,11 @@ def product_list_api_view(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def product_detail_api_view(request, id):
 
-    try:
-        product = models.Product.objects.get(id=id)
-    except models.Product.DoesNotExist:
+    product = models.Product.objects.filter(id=id).first()
+
+    if not product:
         return Response(
-            data={'error': 'product not found!'},
+            {"error": "Product not found"},
             status=status.HTTP_404_NOT_FOUND
         )
 
@@ -128,11 +127,11 @@ def review_list_api_view(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def review_detail_api_view(request, id):
 
-    try:
-        review = models.Review.objects.get(id=id)
-    except models.Review.DoesNotExist:
+    review = models.Review.objects.filter(id=id).first()
+
+    if not review:
         return Response(
-            data={'error': 'review not found!'},
+            {"error": "Review not found"},
             status=status.HTTP_404_NOT_FOUND
         )
 
