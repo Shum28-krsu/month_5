@@ -6,6 +6,7 @@ from django.db.models import Avg
 from . import serializers
 from . import models 
 
+
 #Category
 @api_view(['GET', 'POST'])
 def category_list_api_view(request):
